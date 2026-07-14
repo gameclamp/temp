@@ -1,0 +1,94 @@
+name: convert
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 */12 * * *'
+
+jobs:
+  convert:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 检出当前仓库
+        uses: actions/checkout@v6
+
+      - name: 克隆
+        env:
+          REPO_B64: aHR0cHM6Ly9naXRsYWIuY29tL2ZyZWU5OTk5L2lwdXBkYXRlLmdpdA==
+        run: |
+          REPO_URL=$(echo "$REPO_B64" | base64 -d)
+
+          git clone --depth=1 --filter=blob:none --sparse \
+            "$REPO_URL" ipupdate
+
+          cd ipupdate
+
+          git sparse-checkout set backup/img/1/2/ip
+
+      - name: 转换全部配置文件
+        run: |
+          # ============================================================
+          # 写入统一转换脚本
+          # ============================================================
+          echo 'aW1wb3J0IGpzb24sb3Msc3lzLHVybGxpYi5wYXJzZSx5YW1sCmRlZiBfaHAoZSk6CiBlPWUuc3RyaXAoKQogaWYgZS5zdGFydHN3aXRoKCdbJyk6CiAgaT1lLmZpbmQoJ10nKTtyZXR1cm4gZVsxOmldLGVbaSsxOl0ubHN0cmlwKCc6JyksVHJ1ZQogaWYnOidpbiBlIGFuZCBlLmNvdW50KCc6Jyk+MSBhbmQgbm90IGVbZS5pbmRleCgnOicpKzFdLmlzZGlnaXQoKToKICBpPWUucmZpbmQoJzonKTtyZXR1cm4gZVs6aV0sZVtpKzE6XSxUcnVlCiBoLF8scD1lLnBhcnRpdGlvbignOicpO3JldHVybiBoLHAsRmFsc2UKZGVmIF9hdShoLGIpOnJldHVybiBmIlt7aH1dIiBpZiBiIGVsc2UgaApkZWYgX2YoaCk6cmV0dXJuIHVybGxpYi5wYXJzZS5xdW90ZShoLHNhZmU9JycpCmRlZiBfYih2KTpyZXR1cm4nMSdpZiB2IGVsc2UnMCcKZGVmIHZsZXNzX2xpbmsoZCk6CiBmb3IgbyBpbiBkLmdldCgnb3V0Ym91bmRzJyxbXSk6CiAgaWYgby5nZXQoJ3Byb3RvY29sJykhPSd2bGVzcyc6Y29udGludWUKICB2bj1vWydzZXR0aW5ncyddWyd2bmV4dCddWzBdO2FkPXZuWydhZGRyZXNzJ107cHQ9dm5bJ3BvcnQnXTt1PXZuWyd1c2VycyddWzBdO3VpZD11WydpZCddO2VuPXUuZ2V0KCdlbmNyeXB0aW9uJywnbm9uZScpO2ZsPXUuZ2V0KCdmbG93JywnJykKICBzPW8uZ2V0KCdzdHJlYW1TZXR0aW5ncycse30pO250PXMuZ2V0KCduZXR3b3JrJywndGNwJyk7c2M9cy5nZXQoJ3NlY3VyaXR5Jywnbm9uZScpO3NuaT1mcD1wYms9c2lkPXBhdGg9bW9kZT0nJwogIGlmIHNjPT0ncmVhbGl0eSc6CiAgIHI9cy5nZXQoJ3JlYWxpdHlTZXR0aW5ncycse30pO3NuaT1yLmdldCgnc2VydmVyTmFtZScsJycpO2ZwPXIuZ2V0KCdmaW5nZXJwcmludCcsJycpO3Biaz1yLmdldCgncHVibGljS2V5JywnJyk7c2lkPXIuZ2V0KCdzaG9ydElkJywnJykKICBpZiBudD09J3hodHRwJzoKICAgeD1zLmdldCgneGh0dHBTZXR0aW5ncycse30pO3BhdGg9eC5nZXQoJ3BhdGgnLCcnKTttb2RlPXguZ2V0KCdtb2RlJywnJykKICBlbGlmIG50PT0nd3MnOnBhdGg9cy5nZXQoJ3dzU2V0dGluZ3MnLHt9KS5nZXQoJ3BhdGgnLCcnKQogIGVsaWYgbnQgaW4oJ2gyJywnaHR0cCcpOnBhdGg9cy5nZXQoJ2h0dHBTZXR0aW5ncycse30pLmdldCgncGF0aCcsJycpCiAgaD1mIlt7YWR9XSJpZic6J2luIGFkIGVsc2UgYWQKICBsPWYidmxlc3M6Ly97dWlkfUB7aH06e3B0fT9lbmNyeXB0aW9uPXtlbn0iCiAgaWYgZmw6bCs9ZiImZmxvdz17Zmx9IgogIGwrPWYiJnNlY3VyaXR5PXtzY30iCiAgaWYgc25pOmwrPWYiJnNuaT17c25pfSIKICBpZiBmcDpsKz1mIiZmcD17ZnB9IgogIGlmIHBiazpsKz1mIiZwYms9e3Bia30iCiAgaWYgc2lkOmwrPWYiJnNpZD17c2lkfSIKICBsKz1mIiZ0eXBlPXtudH0iCiAgaWYgc25pOmwrPWYiJmhvc3Q9e3NuaX0iCiAgaWYgcGF0aDpsKz1mIiZwYXRoPXt1cmxsaWIucGFyc2UucXVvdGUocGF0aCxzYWZlPScnKX0iCiAgaWYgbW9kZTpsKz1mIiZtb2RlPXttb2RlfSIKICByZXR1cm4gbCtmIiN7X2YoYWQpfSIKIHJldHVybiBOb25lCmRlZiB0dWljX2xpbmsocyxwLHUscHcsc25pLGFscG4sY2MsaW5zZWN1cmU9VHJ1ZSk6CiByZXR1cm4gZiJ0dWljOi8ve3V9JTNBe3VybGxpYi5wYXJzZS5xdW90ZShwdyxzYWZlPScnKX1Ae3N9OntwfT9zbmk9e3NuaX0mYWxwbj17YWxwbn0maW5zZWN1cmU9e19iKGluc2VjdXJlKX0mYWxsb3dJbnNlY3VyZT17X2IoaW5zZWN1cmUpfSZjb25nZXN0aW9uX2NvbnRyb2w9e2NjfSN7X2YocyBpZidbJ25vdCBpbiBzIGVsc2Ugcy5zdHJpcCgnW10nKSl9IgpkZWYgdHVpY19mcm9tX2pzb24oZCk6CiBmb3IgbyBpbiBkLmdldCgnb3V0Ym91bmRzJyxbXSk6CiAgaWYgby5nZXQoJ3R5cGUnKSE9J3R1aWMnOmNvbnRpbnVlCiAgdD1vLmdldCgndGxzJyx7fSk7cz1vWydzZXJ2ZXInXTtzaD1zLnN0cmlwKCdbXScpaWYgcy5zdGFydHN3aXRoKCdbJyllbHNlIHMKICByZXR1cm4gdHVpY19saW5rKHNoLG9bJ3NlcnZlcl9wb3J0J10sb1sndXVpZCddLG8uZ2V0KCdwYXNzd29yZCcsJycpLHQuZ2V0KCdzZXJ2ZXJfbmFtZScsJycpLCh0LmdldCgnYWxwbicpb3JbJ2gzJ10pWzBdLG8uZ2V0KCdjb25nZXN0aW9uX2NvbnRyb2wnLCdiYnInKSx0LmdldCgnaW5zZWN1cmUnLEZhbHNlKSkKIHJldHVybiBOb25lCmRlZiBqdWljaXR5X2Zyb21fanNvbihkKToKIGlmJ3V1aWQnbm90IGluIGQgb3Inc2VydmVyJ25vdCBpbiBkOnJldHVybiBOb25lCiBzLHAsYj1faHAoZFsnc2VydmVyJ10pO2g9X2F1KHMsYik7c25pPWQuZ2V0KCdzbmknLCcnKTtpbnM9ZC5nZXQoJ2FsbG93X2luc2VjdXJlJyxGYWxzZSk7Y2M9ZC5nZXQoJ2Nvbmdlc3Rpb25fY29udHJvbCcsJ2JicicpCiByZXR1cm4gZiJqdWljaXR5Oi8ve2RbJ3V1aWQnXX06e3VybGxpYi5wYXJzZS5xdW90ZShkLmdldCgncGFzc3dvcmQnLCcnKSxzYWZlPScnKX1Ae2h9OntwfT9zbmk9e3NuaX0maW5zZWN1cmU9e19iKGlucyl9JmFsbG93X2luc2VjdXJlPXtfYihpbnMpfSZjb25nZXN0aW9uX2NvbnRyb2w9e2NjfSN7X2Yocyl9IgpkZWYgYW55dGxzX2xpbmsocyxwLHB3LGZwLGFsLGluc2VjdXJlPVRydWUpOgogcmV0dXJuIGYiYW55dGxzOi8ve3VybGxpYi5wYXJzZS5xdW90ZShwdyxzYWZlPScnKX1Ae3N9OntwfT9zZWN1cml0eT10bHMmZnA9e2ZwfSZhbHBuPXt1cmxsaWIucGFyc2UucXVvdGUoJywnLmpvaW4oYWwpLHNhZmU9JycpfSZpbnNlY3VyZT17X2IoaW5zZWN1cmUpfSZhbGxvd0luc2VjdXJlPXtfYihpbnNlY3VyZSl9JnR5cGU9dGNwI3tfZihzKX0iCmRlZiBfYWkocCk6CiBpZidza2lwLWNlcnQtdmVyaWZ5J2luIHA6cmV0dXJuIGJvb2wocFsnc2tpcC1jZXJ0LXZlcmlmeSddKQogcmV0dXJuIFRydWUKZGVmIGh5c3RlcmlhMl9saW5rKHMscCxhLHNuaSxpbnNlY3VyZSk6CiBoPWYiW3tzfV0iaWYnOidpbiBzIGVsc2UgcwogcmV0dXJuIGYiaHlzdGVyaWEyOi8ve3VybGxpYi5wYXJzZS5xdW90ZShhLHNhZmU9JycpfUB7aH06e3B9P3NuaT17c25pfSZpbnNlY3VyZT17X2IoaW5zZWN1cmUpfSZhbGxvd0luc2VjdXJlPXtfYihpbnNlY3VyZSl9I3tfZihzKX0iCmRlZiBoeXN0ZXJpYTJfZnJvbV9qc29uKGQpOgogaWYnYXV0aCdub3QgaW4gZCBvcidzZXJ2ZXInbm90IGluIGQ6cmV0dXJuIE5vbmUKIHMscCxfPV9ocChkWydzZXJ2ZXInXSk7dD1kLmdldCgndGxzJyx7fSk7cmV0dXJuIGh5c3RlcmlhMl9saW5rKHMscCxkWydhdXRoJ10sdC5nZXQoJ3NuaScsJycpLGJvb2wodC5nZXQoJ2luc2VjdXJlJyxGYWxzZSkpKQpkZWYgaHlzdGVyaWFfbGluayhzLHAsYSxzbmksYWxwbixpbnNlY3VyZSxwZWVyPU5vbmUpOgogaD1mIlt7c31dImlmJzonaW4gcyBlbHNlIHMKIGw9ZiJoeXN0ZXJpYTovL3t1cmxsaWIucGFyc2UucXVvdGUoYSxzYWZlPScnKX1Ae2h9OntwfT9wcm90b2NvbD11ZHAmYXV0aD17dXJsbGliLnBhcnNlLnF1b3RlKGEsc2FmZT0nJyl9IgogaWYgcGVlcjpsKz1mIiZwZWVyPXtwZWVyfSIKIGwrPWYiJmluc2VjdXJlPXtfYihpbnNlY3VyZSl9IgogaWYgYWxwbjpsKz1mIiZhbHBuPXthbHBufSIKIGlmIHNuaTpsKz1mIiZzbmk9e3NuaX0iCiByZXR1cm4gbCtmIiN7X2Yocyl9IgpkZWYgaHlzdGVyaWFfZnJvbV9qc29uKGQpOgogaWYnYXV0aF9zdHInbm90IGluIGQgb3Inc2VydmVyJ25vdCBpbiBkOnJldHVybiBOb25lCiBzLHAsXz1faHAoZFsnc2VydmVyJ10pCiByZXR1cm4gaHlzdGVyaWFfbGluayhzLHAsZC5nZXQoJ2F1dGhfc3RyJywnJyksZC5nZXQoJ3NlcnZlcl9uYW1lJywnJyksZC5nZXQoJ2FscG4nLCdoMycpLGJvb2woZC5nZXQoJ2luc2VjdXJlJyxGYWxzZSkpLHBlZXI9ZC5nZXQoJ3NlcnZlcl9uYW1lJywnJykpCmRlZiBuYWl2ZXByb3h5X2xpbmsocHgpOgogaWYgbm90IHB4OnJldHVybiBOb25lCiBzPXB4LnN0cmlwKCkKIGlmIHMuc3RhcnRzd2l0aCgnaHR0cHM6Ly8nKTpyZXN0PXNbbGVuKCdodHRwczovLycpOl0KIGVsaWYgcy5zdGFydHN3aXRoKCdodHRwOi8vJyk6cmVzdD1zW2xlbignaHR0cDovLycpOl0KIGVsc2U6cmVzdD1zCiBjLF8saHA9cmVzdC5ycGFydGl0aW9uKCdAJykKIGlmIG5vdCBjOmMsaHA9JycscmVzdAogaCxwLGI9X2hwKGhwKTtoYT1fYXUoaCxiKQogcmV0dXJuIGYibmFpdmUraHR0cHM6Ly97Y31Ae2hhfTp7cH0/c2VjdXJpdHk9dGxzJmluc2VjdXJlPTAmYWxsb3dJbnNlY3VyZT0wJnR5cGU9dGNwI3tfZihoKX0iCmRlZiBuYWl2ZXByb3h5X2Zyb21fanNvbihkKToKIHJldHVybiBuYWl2ZXByb3h5X2xpbmsoZFsncHJveHknXSlpZidwcm94eSdpbiBkIGVsc2UgTm9uZQpkZWYgbGlua19mcm9tX2pzb25fb2JqKGQpOgogcmV0dXJuIHZsZXNzX2xpbmsoZClvciB0dWljX2Zyb21fanNvbihkKW9yIGp1aWNpdHlfZnJvbV9qc29uKGQpb3IgaHlzdGVyaWEyX2Zyb21fanNvbihkKW9yIGh5c3RlcmlhX2Zyb21fanNvbihkKW9yIG5haXZlcHJveHlfZnJvbV9qc29uKGQpCmRlZiBsaW5rc19mcm9tX3lhbWwoZCk6CiBMPVtdCiBmb3IgcCBpbiBkLmdldCgncHJveGllcycsW10pOgogIHQ9cC5nZXQoJ3R5cGUnKQogIGlmIHQ9PSd0dWljJzoKICAgTC5hcHBlbmQodHVpY19saW5rKHBbJ3NlcnZlciddLHBbJ3BvcnQnXSxwWyd1dWlkJ10scC5nZXQoJ3Bhc3N3b3JkJywnJykscC5nZXQoJ3NuaScsJycpLChwLmdldCgnYWxwbicpb3JbJ2gzJ10pWzBdLHAuZ2V0KCdjb25nZXN0aW9uLWNvbnRyb2xsZXInLCdiYnInKSxib29sKHAuZ2V0KCdza2lwLWNlcnQtdmVyaWZ5JyxGYWxzZSkpKSkKICBlbGlmIHQ9PSdhbnl0bHMnOgogICBMLmFwcGVuZChhbnl0bHNfbGluayhwWydzZXJ2ZXInXSxwWydwb3J0J10scC5nZXQoJ3Bhc3N3b3JkJywnJykscC5nZXQoJ2NsaWVudC1maW5nZXJwcmludCcsJ2Nocm9tZScpLHAuZ2V0KCdhbHBuJyxbJ2gzJ10pLF9haShwKSkpCiAgZWxpZiB0PT0naHlzdGVyaWEyJzoKICAgTC5hcHBlbmQoaHlzdGVyaWEyX2xpbmsocFsnc2VydmVyJ10scFsncG9ydCddLHAuZ2V0KCdwYXNzd29yZCcsJycpLHAuZ2V0KCdzbmknLCcnKSxib29sKHAuZ2V0KCdza2lwLWNlcnQtdmVyaWZ5JyxGYWxzZSkpKSkKICBlbGlmIHQ9PSdoeXN0ZXJpYSc6CiAgIEwuYXBwZW5kKGh5c3RlcmlhX2xpbmsocFsnc2VydmVyJ10scFsncG9ydCddLHAuZ2V0KCdhdXRoLXN0cicsJycpb3IgcC5nZXQoJ2F1dGhfc3RyJywnJykscC5nZXQoJ3NuaScsJycpLChwLmdldCgnYWxwbicpb3JbJ2gzJ10pWzBdLGJvb2wocC5nZXQoJ3NraXAtY2VydC12ZXJpZnknLEZhbHNlKSkscGVlcj1wLmdldCgnc25pJywnJykpKQogcmV0dXJuIEwKZGVmIGxpbmtzX2Zyb21fc2hhZG93cXVpY195YW1sKGQpOgogbz1kLmdldCgnb3V0Ym91bmQnLHt9KQogaWYgbm90IG8gb3Igby5nZXQoJ3R5cGUnKSE9J3NoYWRvd3F1aWMnOnJldHVybltdCiBzLHAsYj1faHAoby5nZXQoJ2FkZHInLCcnKSk7aD1fYXUocyxiKQogcmV0dXJuW2Yic2hhZG93cXVpYzovL3t1cmxsaWIucGFyc2UucXVvdGUoby5nZXQoJ3VzZXJuYW1lJywnJyksc2FmZT0nJyl9Ont1cmxsaWIucGFyc2UucXVvdGUoby5nZXQoJ3Bhc3N3b3JkJywnJyksc2FmZT0nJyl9QHtofTp7cH0/c25pPXtvLmdldCgnc2VydmVyLW5hbWUnLCcnKX0mYWxwbj17JywnLmpvaW4oby5nZXQoJ2FscG4nLFsnaDMnXSkpfSZjb25nZXN0aW9uLWNvbnRyb2w9e28uZ2V0KCdjb25nZXN0aW9uLWNvbnRyb2wnLCdiYnInKX0memVyby1ydHQ9e19iKG8uZ2V0KCd6ZXJvLXJ0dCcsRmFsc2UpKX0je19mKHMpfSJdCmRlZiBtYWluKCk6CiBpZiBsZW4oc3lzLmFyZ3YpPDI6cHJpbnQoIkVSUk9SOiB1c2FnZTogc2NyaXB0Lm1pbi5weSA8Y29uZmlnLmpzb258Y29uZmlnLnlhbWw+IixmaWxlPXN5cy5zdGRlcnIpO3N5cy5leGl0KDApCiBmcD1zeXMuYXJndlsxXTtleHQ9b3MucGF0aC5zcGxpdGV4dChmcClbMV0ubG93ZXIoKQogaWYgZXh0PT0nLmpzb24nOgogIHdpdGggb3BlbihmcCxlbmNvZGluZz0ndXRmLTgnKWFzIGY6ZD1qc29uLmxvYWQoZikKICBMPVtdCiAgZm9yIHggaW4oZCBpZiBpc2luc3RhbmNlKGQsbGlzdCllbHNlW2RdKToKICAgbD1saW5rX2Zyb21fanNvbl9vYmooeCkKICAgaWYgbDpMLmFwcGVuZChsKQogIGlmIEw6CiAgIGZvciBsIGluIEw6cHJpbnQobCkKICBlbHNlOnByaW50KGYiRVJST1I6IG5vIHN1cHBvcnRlZCBwcm94eSBmb3VuZCBpbiB7ZnB9IixmaWxlPXN5cy5zdGRlcnIpO3N5cy5leGl0KDApCiBlbGlmIGV4dCBpbignLnlhbWwnLCcueW1sJyk6CiAgd2l0aCBvcGVuKGZwLGVuY29kaW5nPSd1dGYtOCcpYXMgZjpkPXlhbWwuc2FmZV9sb2FkKGYpCiAgTD1saW5rc19mcm9tX3lhbWwoZClvciBsaW5rc19mcm9tX3NoYWRvd3F1aWNfeWFtbChkKQogIGlmIEw6CiAgIGZvciBsIGluIEw6cHJpbnQobCkKICBlbHNlOnByaW50KGYiRVJST1I6IG5vIHN1cHBvcnRlZCBwcm94eSBmb3VuZCBpbiB7ZnB9IixmaWxlPXN5cy5zdGRlcnIpO3N5cy5leGl0KDApCiBlbHNlOnByaW50KGYiRVJST1I6IHVuc3VwcG9ydGVkIGV4dGVuc2lvbiB7ZXh0fSIsZmlsZT1zeXMuc3RkZXJyKTtzeXMuZXhpdCgwKQppZiBfX25hbWVfXz09J19fbWFpbl9fJzptYWluKCkK' | base64 -d > /tmp/convert.py
+
+          pip install pyyaml -q
+
+          OUTPUT_FILE="links.txt"
+          > "$OUTPUT_FILE"
+
+          INDEX=1
+
+          # ============================================================
+          # 自动寻找 config.json / config.yaml
+          # ============================================================
+          find ipupdate/backup/img/1/2/ip \
+            \( -name "config.json" -o -name "config.yaml" -o -name "client.yaml" \) \
+            | sort \
+            > /tmp/config_list.txt
+
+          echo "发现配置文件："
+          cat /tmp/config_list.txt
+
+          echo ""
+
+          # ============================================================
+          # 逐个处理
+          # ============================================================
+          while read -r CFG_FILE; do
+            echo "===== 处理配置 #${INDEX} ====="
+            echo "文件: $CFG_FILE"
+
+            LINK=$(python3 /tmp/convert.py "$CFG_FILE" 2>&1)
+
+            if [ $? -ne 0 ]; then
+              echo "::warning::配置 #${INDEX}: 转换失败 - $LINK"
+            else
+              echo "$LINK" >> "$OUTPUT_FILE"
+            fi
+
+            INDEX=$((INDEX + 1))
+
+          done < /tmp/config_list.txt
+
+          echo ""
+          echo "===== Base64 编码 ====="
+
+          FULL_B64=$(cat "$OUTPUT_FILE" | base64 -w 0)
+          echo "$FULL_B64" > "$OUTPUT_FILE"
+
+      - name: 推送到仓库
+        run: |
+          git add links.txt
+
+          if git diff --cached --quiet; then
+            echo "无变化，跳过提交"
+          else
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+            git commit -m "chore: 更新链接 [$(date -u '+%Y-%m-%d %H:%M')]"
+
+            git push
+          fi
